@@ -19,13 +19,22 @@ import org.ciedayap.utils.StringUtils;
  * @version 1.0
  */
 public class Tuple implements Serializable{
-    private final Attributes attributes;
+    protected final Attributes attributes;
     private final ConcurrentHashMap<Long,Object> valuesByAttribute;
     
     public Tuple(Attributes at)
     {
         this.attributes=at;
         valuesByAttribute=new ConcurrentHashMap(at.columnCount());
+    }
+    
+    /**
+     * It returns the attributes related to the Tuple instance
+     * @return  The associated attributes to the Tuple instance
+     */
+    public Attributes getAttributes()
+    {
+        return attributes;
     }
     
     /**
@@ -47,7 +56,7 @@ public class Tuple implements Serializable{
      * @param value New value to be incorporated
      * @return TRUE if the updating could be made, false otherwise.
      */
-    public synchronized boolean update(Attribute at, Object value)
+    public final synchronized boolean update(Attribute at, Object value)
     {
         if(at==null || value==null) return false;
         if(valuesByAttribute==null) return false;
@@ -156,14 +165,21 @@ public class Tuple implements Serializable{
     */
    public synchronized boolean isConsistent()
    {
-       if(attributes==null) return false;
-       if(attributes.columnCount()==0) return false;
+       if(attributes==null){
+           System.out.println("[Tuple] No Attributes");
+           return false;
+       }
+       if(attributes.columnCount()==0) 
+       {
+           System.out.println("[Tuple] Attributes. Column Count: 0");
+           return false;
+       }
        
        for(int i=0;i<attributes.columnCount();i++)
        {
            if(this.existValue(attributes.get(i))) return true;
        }
-              
+                     
        return false;
    }
 }
