@@ -5,15 +5,20 @@
  */
 package org.ciedayap.cincamimisconversor;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Random;
+import org.ciedayap.cincamimisconversor.arff.ArffConverter;
 import org.ciedayap.cincamimis.Cincamimis;
 import org.ciedayap.cincamimis.Context;
 import org.ciedayap.cincamimis.LikelihoodDistribution;
@@ -32,7 +37,7 @@ import org.ciedayap.utils.TranslateXML;
  * @author Mario
  */
 public class test {
-    public static void main(String args[]) throws LikelihoodDistributionException, NoSuchAlgorithmException, QueueException, InterruptedException
+    public static void main(String args[]) throws LikelihoodDistributionException, NoSuchAlgorithmException, QueueException, InterruptedException, IOException
     {
        //Runing 1. conversion times
         //for(int i=100;i<500;i+=100)
@@ -105,10 +110,19 @@ public class test {
         
        // simula(1000,false);
         
-        descriptive();
+        //ZonedDateTime zdt=ZonedDateTime.now();
+        //System.out.println(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(zdt));
         //ZonedDateTime zdt=ZonedDateTime.now();
         //String s=DateTimeFormatter.ofPattern("VV").format(zdt);
         //System.out.println(s);
+        
+       //Runing 5. conversion times for ARFF data format
+       
+       for(int i=100;i<=5000;i+=100)
+            simulaArffConverter(i,-1);
+       
+       //descriptive();
+        
     }
 
     public static Cincamimis getMessage(int nmeasurements,int nmetrics) throws NoSuchAlgorithmException, LikelihoodDistributionException
@@ -242,7 +256,63 @@ public class test {
         }
     }
     
-    public static void descriptive() throws NoSuchAlgorithmException, LikelihoodDistributionException
+    /**
+     * It is responsible for simulating the associated time in relation to the translation operation
+     * @param volMax Maximum number of measurements in the Cincami/MIS object model
+     * @param threshold Maximum number of measurements to be informed as result
+     * @throws LikelihoodDistributionException It is raised if the likelihood distribution is not correctly defined.
+     * @throws NoSuchAlgorithmException It is fired when MD5 is not implemmented on the platform 
+     */
+    public static void simulaArffConverter(int volMax,long threshold) throws LikelihoodDistributionException, NoSuchAlgorithmException, FileNotFoundException, IOException
+    {
+        LikelihoodDistribution ld;
+        ld = LikelihoodDistribution.factoryRandomDistributionEqualLikelihood(3L, 5L);        
+        Context myContext=Context.factoryEstimatedValuesWithoutCD("idMetricContextProperty", ld);
+        Random r=new Random();
+        
+        ArrayList tabla=new ArrayList();
+        ArrayList registro;
+
+
+          registro=new ArrayList();
+          Cincamimis flujo=new Cincamimis();
+          flujo.setDsAdapterID("dsAdapter1");
+          MeasurementItemSet mis=new MeasurementItemSet();
+          for(int j=0;j<volMax;j++)
+          {//Genero desde 1 hasta i (multiplo de salto) mensajes hastya llegar a volMax
+              MeasurementItem mi=MeasurementItem.factory("idEntity1", "dataSource1", "myFormat", "idMetric"+(j%3), 
+                      BigDecimal.TEN.multiply(BigDecimal.valueOf(r.nextGaussian())));
+              if((j%2)==0) mi.setContext(myContext);
+              mis.add(mi);
+          }
+        
+        flujo.setMeasurements(mis);
+        long before, after,stages[]=new long[2];
+        CincamimisWindow tm=TabularMode.translate(flujo);      
+        
+        before=System.nanoTime();        
+        String ret=ArffConverter.fromWindow(tm,"myRelation",threshold);
+        System.out.println(ret);
+        after=System.nanoTime();
+        
+        
+        if(!StringUtils.isEmpty(ret) && ret.indexOf("@DATA")>0)
+            stages[0]=(after-before);
+            
+        ZonedDateTime zdt=ZonedDateTime.now();
+        StringBuilder sb=new StringBuilder();
+        sb.append("/Users/mjdivan/weka/archivo").append(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS").format(zdt)).append(".arff");
+        before=System.nanoTime();
+        FileOutputStream fos=new FileOutputStream(sb.toString(),true);
+        ArffConverter.fromWindowToFile(tm, "myRelation", fos, "UTF-8");
+        after=System.nanoTime();
+        stages[1]=(after-before);
+        sb.delete(0, sb.length());
+               
+        System.out.println("Records: "+tm.getRowCount()+" Conversion: "+stages[0]+" FlushFile: "+stages[1]);
+    }
+    
+    public static void descriptive() throws NoSuchAlgorithmException, LikelihoodDistributionException, FileNotFoundException, IOException
     {
         LikelihoodDistribution ld;
         ld = LikelihoodDistribution.factoryRandomDistributionEqualLikelihood(3L, 5L);        
@@ -256,7 +326,7 @@ public class test {
           Cincamimis flujo=new Cincamimis();
           flujo.setDsAdapterID("dsAdapter1");
           MeasurementItemSet mis=new MeasurementItemSet();
-          for(int j=0;j<3;j++)
+          for(int j=0;j<15;j++)
           {//Genero desde 1 hasta i (multiplo de salto) mensajes hastya llegar a volMax
               MeasurementItem mi=MeasurementItem.factory("idEntity1", "dataSource1", "myFormat", "idMetric"+(j%3), 
                       BigDecimal.TEN.multiply(BigDecimal.valueOf(r.nextGaussian())));
@@ -286,7 +356,10 @@ public class test {
           }
           
           Tuple t=tm.getRowAt(i);
+          DecimalFormatSymbols decSymbol = new DecimalFormatSymbols();
+          decSymbol.setDecimalSeparator('.');
           DecimalFormat df=new DecimalFormat("#######0.000");
+          
           for(int j=0;j<tm.columnCount();j++)
           {
               if(tm.getColumnMetadata(j).isQuantitative())
@@ -320,6 +393,19 @@ public class test {
           }
           System.out.println();           
         }
+       
+        
+        ArrayList lista=ArffConverter.partitionFromWindow(tm,"myRelation",4);
+        for(int i=0;i<lista.size();i++)
+        {
+            System.out.println("***Content***");
+            System.out.println(lista.get(i));
+            System.out.println();
+        }
+       //System.out.println(ArffConverter.fromWindow(tm,"myRelation",-1));
+        
+       //FileOutputStream fos=new FileOutputStream("/Users/mjdivan/archivo.arff",true);
+       //ArffConverter.fromWindowToFile(tm,"myRelation",fos,"UTF-8");
         
     }
 }
