@@ -143,7 +143,7 @@ public class test {
           for(int j=0;j<nmeasurements;j++)
           {//Genero desde 1 hasta i (multiplo de salto) mensajes hastya llegar a volMax
               MeasurementItem mi=MeasurementItem.factory("idEntity1", "dataSource1", "myFormat", "idMetric"+(j%nmetrics), 
-                      BigDecimal.TEN.multiply(BigDecimal.valueOf(r.nextGaussian())));
+                      BigDecimal.TEN.multiply(BigDecimal.valueOf(r.nextGaussian())),"PRJ1","EC1");
               if((j%2)==0) mi.setContext(myContext);
               mis.add(mi);
           }
@@ -177,7 +177,7 @@ public class test {
           for(int j=0;j<volMax;j++)
           {//Genero desde 1 hasta i (multiplo de salto) mensajes hastya llegar a volMax
               MeasurementItem mi=MeasurementItem.factory("idEntity1", "dataSource1", "myFormat", "idMetric"+(j%3), 
-                      BigDecimal.TEN.multiply(BigDecimal.valueOf(r.nextGaussian())));
+                      BigDecimal.TEN.multiply(BigDecimal.valueOf(r.nextGaussian())),"PRJ1","EC1");
               if((j%2)==0) mi.setContext(myContext);
               mis.add(mi);
           }
@@ -281,7 +281,7 @@ public class test {
           for(int j=0;j<volMax;j++)
           {//Genero desde 1 hasta i (multiplo de salto) mensajes hastya llegar a volMax
               MeasurementItem mi=MeasurementItem.factory("idEntity1", "dataSource1", "myFormat", "idMetric"+(j%3), 
-                      BigDecimal.TEN.multiply(BigDecimal.valueOf(r.nextGaussian())));
+                      BigDecimal.TEN.multiply(BigDecimal.valueOf(r.nextGaussian())),"PRJ1","EC1");
               if((j%2)==0) mi.setContext(myContext);
               mis.add(mi);
           }
@@ -329,7 +329,7 @@ public class test {
           for(int j=0;j<15;j++)
           {//Genero desde 1 hasta i (multiplo de salto) mensajes hastya llegar a volMax
               MeasurementItem mi=MeasurementItem.factory("idEntity1", "dataSource1", "myFormat", "idMetric"+(j%3), 
-                      BigDecimal.TEN.multiply(BigDecimal.valueOf(r.nextGaussian())));
+                      BigDecimal.TEN.multiply(BigDecimal.valueOf(r.nextGaussian())),"PRJ1","EC1");
               if((j%2)==0) mi.setContext(myContext);
               mis.add(mi);
           }
