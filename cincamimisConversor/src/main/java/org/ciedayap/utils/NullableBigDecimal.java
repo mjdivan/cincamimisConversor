@@ -14,7 +14,7 @@ import java.util.Objects;
  * there is not a given value.
  * 
  * @author Mario Diván
- * @see 1.0
+ * @version  1.0
  */
 public class NullableBigDecimal implements Serializable{
     private BigDecimal value;

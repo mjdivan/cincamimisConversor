@@ -74,7 +74,7 @@ public class QuantitativeUtils {
     
     /**
      * It is responsible for verifying if the estimated value contains a 
-     * valid pair <value,likelihhod>
+     * valid pair (value,likelihhod)
      * @param e The estimated value to be verified
      * @return TRUE if the estimated value is complete and consistent,
      * FALSE otherwise

@@ -103,7 +103,7 @@ public class ColumnarData implements Serializable{
      * because the result will be false in this case.
      * @return TRUE if the empty instance was incorporated, false otherwise.
      * @throws AttributeException This exception is raised when the column name was not defined
-     * @See QuantitativeUtils
+     * @see QuantitativeUtils
      */
     public synchronized boolean addNull() throws AttributeException
     {
